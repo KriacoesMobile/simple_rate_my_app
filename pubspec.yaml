@@ -2,7 +2,7 @@ name: simple_rate_my_app
 description: Simple way to get user rating
 version: 1.0.0
 author: Thize
-homepage:
+homepage: https://github.com/thize/simple_rate_my_app
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
