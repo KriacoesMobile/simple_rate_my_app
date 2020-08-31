@@ -1,14 +1,15 @@
 name: simple_rate_my_app
 description: Simple way to get user rating
-version: 1.0.0
+version: 2.0.0
 homepage: https://github.com/thize/simple_rate_my_app
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  in_app_review: ^0.2.0+4
+  get_version: ^0.2.2
   hive: ^1.4.1+1
-  app_review: ^1.1.2
   flutter:
     sdk: flutter
 

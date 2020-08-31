@@ -1,24 +1,22 @@
 import 'dart:io';
 
-import 'package:app_review/app_review.dart';
-import 'package:flutter/material.dart';
+import 'package:get_version/get_version.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:hive/hive.dart';
 
 class SimpleRateMyApp {
-  static void Function() _onShowIOS;
-  static void Function() _onShowAndroid;
+  static void Function() _onShow;
   static bool Function() _ruleToShow;
   static bool _showIsActivated = true;
   static int daysElapsed;
   static int launchesElapsed;
+  static final InAppReview inAppReview = InAppReview.instance;
 
-  static Future<void> init({
-    @required void Function() onShowAndroid,
-    void Function() onShowIOS = openIosRateDialog,
+  static Future init({
+    void Function() onShow = openPlatformRateDialog,
     bool Function() ruleToShow = _defaultRule,
   }) async {
-    _onShowIOS = onShowIOS;
-    _onShowAndroid = onShowAndroid;
+    _onShow = onShow;
     _ruleToShow = ruleToShow;
     await _HiveData.init();
     _showIsActivated = _HiveData.showIsActivated();
@@ -26,21 +24,29 @@ class SimpleRateMyApp {
     launchesElapsed = _HiveData.launchesElapsed();
   }
 
-  static Future<void> openStore() async => AppReview.storeListing;
+  static Future openStore() async {
+    if (Platform.isIOS || Platform.isMacOS) {
+      String appStoreId;
+      try {
+        appStoreId = await GetVersion.appID;
+      } catch (e) {
+        appStoreId = 'Failed to get app ID.';
+      }
+      await inAppReview.openStoreListing(appStoreId: appStoreId);
+    } else {
+      await inAppReview.openStoreListing();
+    }
+  }
 
-  static void openIosRateDialog({void Function(String) callBack}) {
-    if (Platform.isIOS) {
-      AppReview.requestReview.then(callBack);
+  static Future openPlatformRateDialog({void Function(String) callBack}) async {
+    if (await inAppReview.isAvailable()) {
+      await inAppReview.requestReview();
     }
   }
 
   static void show({bool force = false}) {
     if (force || (_showIsActivated && _ruleToShow())) {
-      if (Platform.isIOS) {
-        _onShowIOS();
-      } else if (_onShowAndroid != null) {
-        _onShowAndroid();
-      }
+      _onShow();
     }
   }
 
