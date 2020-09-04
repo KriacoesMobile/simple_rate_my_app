@@ -12,6 +12,8 @@ class SimpleRateMyApp {
   static int launchesElapsed;
   static final InAppReview inAppReview = InAppReview.instance;
 
+  static bool get showIsActivated => _showIsActivated;
+
   static Future init({
     void Function() onShow = openPlatformRateDialog,
     bool Function() ruleToShow = _defaultRule,
