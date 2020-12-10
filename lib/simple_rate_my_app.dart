@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:get_version/get_version.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:hive_flutter/hive_flutter.dart';
 
 class SimpleRateMyApp {
   static void Function() _onShow;
@@ -87,6 +89,9 @@ class _HiveData {
   static String get _keyPrefix => 'SRMApp_';
 
   static Future init() async {
+         final Directory appDocumentDir =
+        await path_provider.getApplicationDocumentsDirectory();
+    await Hive.initFlutter(appDocumentDir.path);
     _hiveDataBox = await Hive.openBox('SRMApp');
   }
 

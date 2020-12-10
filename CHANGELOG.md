@@ -1,3 +1,4 @@
+## [2.0.2] - 09/12/2020
 ## [2.0.1] - 09/04/2020
 
 * showIsActivated function changed to public
