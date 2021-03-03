@@ -1,77 +1,51 @@
 import 'dart:io';
 
-import 'package:get_version/get_version.dart';
-import 'package:in_app_review/in_app_review.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:in_app_review/in_app_review.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class SimpleRateMyApp {
-  static void Function() _onShow;
-  static bool Function() _ruleToShow;
-  static bool _showIsActivated = true;
-  static int daysElapsed;
-  static int launchesElapsed;
-  static final InAppReview inAppReview = InAppReview.instance;
+  static late void Function() _onShow;
+  static late bool Function() _canShow;
+  static final InAppReview _inAppReview = InAppReview.instance;
 
-  static bool get showIsActivated => _showIsActivated;
+  static int get daysElapsed => _Data.daysElapsed;
+  static int get launchesElapsed => _Data.launchesElapsed;
+  static bool get showIsActivated => _Data.showIsActivated;
 
   static Future init({
     void Function() onShow = openPlatformRateDialog,
-    bool Function() ruleToShow = _defaultRule,
+    bool Function() canShow = _defaultRuleToShow,
   }) async {
     _onShow = onShow;
-    _ruleToShow = ruleToShow;
-    await _HiveData.init();
-    _showIsActivated = _HiveData.showIsActivated();
-    daysElapsed = _HiveData.daysElapsed();
-    launchesElapsed = _HiveData.launchesElapsed();
+    _canShow = canShow;
+    await _Data.init();
   }
 
-  static Future openStore() async {
-    if (Platform.isIOS || Platform.isMacOS) {
-      String appStoreId;
-      try {
-        appStoreId = await GetVersion.appID;
-      } catch (e) {
-        appStoreId = 'Failed to get app ID.';
-      }
-      await inAppReview.openStoreListing(appStoreId: appStoreId);
-    } else {
-      await inAppReview.openStoreListing();
-    }
-  }
+  static Future openStore(
+          {String? appStoreId, String? microsoftStoreId}) async =>
+      _inAppReview.openStoreListing(
+          appStoreId: appStoreId, microsoftStoreId: microsoftStoreId);
 
-  static Future openPlatformRateDialog({void Function(String) callBack}) async {
-    if (await inAppReview.isAvailable()) {
-      await inAppReview.requestReview();
+  static Future openPlatformRateDialog() async {
+    if (await _inAppReview.isAvailable()) {
+      await _inAppReview.requestReview();
     }
   }
 
   static void show({bool force = false}) {
-    if (force || (_showIsActivated && _ruleToShow())) {
+    if (force || (showIsActivated && _canShow())) {
       _onShow();
     }
   }
 
-  static Future dontShowMore({bool daysAndLaunchers = false}) async {
-    _showIsActivated = false;
-    await _HiveData.setValue('showIsActivated', _showIsActivated);
-    if (daysAndLaunchers) {
-      daysElapsed = 0;
-      await _HiveData.setValue('daysElapsed', daysElapsed);
-      launchesElapsed = 0;
-      await _HiveData.setValue('launchesElapsed', launchesElapsed);
-    }
-  }
+  static Future dontShowMore() async =>
+      _Data.setValue('showIsActivated', false);
 
-  static void reset() {
-    _showIsActivated = true;
-    _HiveData.setValue('showIsActivated', _showIsActivated);
-  }
+  static Future reset() => _Data.setValue('showIsActivated', true);
 
-  // ignore: prefer_function_declarations_over_variables
-  static bool _defaultRule() {
+  static bool _defaultRuleToShow() {
     const int minDays = 7;
     const int minLaunches = 10;
     const int remindDays = 7;
@@ -83,43 +57,38 @@ class SimpleRateMyApp {
   }
 }
 
-class _HiveData {
-  static Box _hiveDataBox;
+class _Data {
+  static late Box _dataBox;
 
   static String get _keyPrefix => 'SRMApp_';
 
   static Future init() async {
-         final Directory appDocumentDir =
+    final Directory appDocumentDir =
         await path_provider.getApplicationDocumentsDirectory();
     await Hive.initFlutter(appDocumentDir.path);
-    _hiveDataBox = await Hive.openBox('SRMApp');
+    _dataBox = await Hive.openBox('SRMApp');
   }
 
-  static bool showIsActivated() {
-    return getValue('showIsActivated', defaultValue: true) as bool;
-  }
+  static bool get showIsActivated =>
+      getValue('showIsActivated', defaultValue: true) as bool;
 
-  static int daysElapsed() {
-    DateTime firstDay = getValue('daysElapsed') as DateTime;
-    if (firstDay == null) {
-      firstDay = DateTime.now();
-      setValue('daysElapsed', firstDay);
-    }
+  static int get daysElapsed {
+    final DateTime firstDay =
+        getValue('daysElapsed', defaultValue: DateTime.now()) as DateTime;
     return firstDay.difference(DateTime.now()).inDays;
   }
 
-  static int launchesElapsed() {
-    int launchers = getValue('launchesElapsed', defaultValue: 0) as int;
+  static int get launchesElapsed {
+    int launchers = getValue('launchesElapsed') as int;
     launchers += 1;
     setValue('launchesElapsed', launchers);
     return launchers;
   }
 
   static Future setValue(String key, value) async {
-    await _hiveDataBox.put(_keyPrefix + key, value);
+    await _dataBox.put('$_keyPrefix$key', value);
   }
 
-  static dynamic getValue(String key, {defaultValue}) {
-    return _hiveDataBox.get('$_keyPrefix$key', defaultValue: defaultValue);
-  }
+  static dynamic? getValue(String key, {defaultValue}) =>
+      _dataBox.get('$_keyPrefix$key', defaultValue: defaultValue);
 }

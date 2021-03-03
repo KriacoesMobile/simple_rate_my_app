@@ -1,12 +1,16 @@
-## [2.0.2] - 09/12/2020
-## [2.0.1] - 09/04/2020
+## [3.0.0-dev.1] - 2020/03/03
+
+* Migrate to null safety.
+
+## [2.0.2] - 2020/09/12
+## [2.0.1] - 2020/09/04
 
 * showIsActivated function changed to public
 
-## [2.0.0] - 08/31/2020
+## [2.0.0] - 2020/08/31
 
 * Added Google Play In-App Review
 
-## [1.0.0] - 06/28/2020
+## [1.0.0] - 2020/06/28
 
 * Simple way to get user rating Initial Release
