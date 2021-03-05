@@ -24,9 +24,11 @@ class SimpleRateMyApp {
   }
 
   static Future openStore(
-          {String? appStoreId, String? microsoftStoreId}) async =>
-      _inAppReview.openStoreListing(
-          appStoreId: appStoreId, microsoftStoreId: microsoftStoreId);
+      {String? appStoreId, String? microsoftStoreId}) async {
+    if (Platform.isIOS || Platform.isMacOS) assert(appStoreId != null);
+    _inAppReview.openStoreListing(
+        appStoreId: appStoreId, microsoftStoreId: microsoftStoreId);
+  }
 
   static Future openPlatformRateDialog() async {
     if (await _inAppReview.isAvailable()) {
