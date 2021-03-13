@@ -1,3 +1,7 @@
+## [3.0.1] - 2020/03/05
+
+* Fix Hive Init
+
 ## [3.0.0] - 2020/03/05
 
 * Migrate to null safety.

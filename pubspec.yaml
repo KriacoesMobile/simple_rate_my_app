@@ -1,6 +1,6 @@
 name: simple_rate_my_app
 description: Simple way to get user rating
-version: 3.0.0
+version: 3.0.1
 homepage: https://github.com/thize/simple_rate_my_app
 
 environment:

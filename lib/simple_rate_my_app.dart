@@ -67,7 +67,9 @@ class _Data {
   static Future init() async {
     final Directory appDocumentDir =
         await path_provider.getApplicationDocumentsDirectory();
-    await Hive.initFlutter(appDocumentDir.path);
+    try {
+      await Hive.initFlutter(appDocumentDir.path);
+    } catch (_) {}
     _dataBox = await Hive.openBox('SRMApp');
   }
 
