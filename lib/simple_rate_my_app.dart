@@ -83,7 +83,7 @@ class _Data {
   }
 
   static int get launchesElapsed {
-    int launchers = getValue('launchesElapsed') as int;
+    int launchers = getValue('launchesElapsed', defaultValue: 0) as int;
     launchers += 1;
     setValue('launchesElapsed', launchers);
     return launchers;
@@ -93,6 +93,6 @@ class _Data {
     await _dataBox.put('$_keyPrefix$key', value);
   }
 
-  static dynamic? getValue(String key, {defaultValue}) =>
+  static dynamic? getValue(String key, {required defaultValue}) =>
       _dataBox.get('$_keyPrefix$key', defaultValue: defaultValue);
 }
